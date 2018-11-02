@@ -28,20 +28,32 @@ function get(url,data,cb,err_callback) {
   url="/get/"+paras[0];
   socket.emit(url,data,cb);
 }
-function delete1(url,data,cb) {
-  var method="DELETE";
-  return myFetch(method,url,JSON.stringify(data),cb)
+function post(url,data,cb,err_callback) {
+  let wds=url.split("/");
+  let paras=wds[2].split("?");
+  url="/post/"+paras[0];
+  socket.emit(url,data,cb);
 }
-function post(url,data,cb) {
-  var method="POST"
-  return myFetch(method,url,JSON.stringify(data),cb)
+function put(url,data,cb,err_callback) {
+  let wds=url.split("/");
+  let paras=wds[2].split("?");
+  url="/put/"+paras[0];
+  socket.emit(url,data,cb);
+}
+function delete1(url,data,cb,err_callback) {
+  let wds=url.split("/");
+  let paras=wds[2].split("?");
+  url="/delete/"+paras[0];
+  socket.emit(url,data,cb);
 }
 function postOrPut(url,data,cb) {
   var method="POST"
   if (data.id){
-    method="PUT"
+    put(url,data,cb);
   }
-  return myFetch(method,url,JSON.stringify(data),cb)
+  else{
+    post(url,data,cb);
+  }
 }
 function postForm(url,data,cb) {
   var method="POST"

@@ -14,16 +14,12 @@ import DialogExampleSimple from './DialogExampleSimple';
 import DialogImportStandard from './DialogImportStandard';
 import ContactEdit from './ContactEdit';
 import update from 'immutability-helper';
-// import image from './logo.svg';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-// import Input, { InputLabel } from '@material-ui/core/Input';
-// import FormControl from '@material-ui/core/FormControl';
-// import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-var socket = require('./data/seq');
+
 const styles = theme => ({
   root: {
     display: 'flex',
@@ -120,45 +116,40 @@ class App extends Component {
     anchorEl: null,
   };
   componentDidMount = () => {
-    socket.init(() => {
-      this.load_data();
-    });
+    this.load_data();
   };
   load_data = () => {
-    Client.contacts(
-      {
-        start: this.mystate.start,
-        limit: this.mystate.limit,
-        search: this.mystate.search,
-        baoxiang: this.mystate.baoxiang,
-      },
-      contacts => {
-        var user = contacts.user;
-        if (user === undefined) {
-          user = 'AnonymousUser';
+    this.props.models.get_Contact(
+      { start:this.mystate.start,
+        limit:this.mystate.limit,
+        search:this.mystate.search,
+        baoxiang:this.mystate.baoxiang,
+      }, 
+      (contacts) => {
+        var user=contacts.user;
+        if(user===undefined){
+          user="AnonymousUser"
         }
-        this.mystate.total = contacts.total; //because async ,mystate set must before state;
+        this.mystate.total=contacts.total;//because async ,mystate set must before state;
         this.setState({
           contacts: contacts.data, //.slice(0, MATCHING_ITEM_LIMIT),
-          limit: this.mystate.limit,
+          limit:this.mystate.limit,
           user: user,
-          total: contacts.total,
-          start: this.mystate.start,
+          total:contacts.total,
+          start:this.mystate.start
         });
+      },(error)=>{
+          // console.log(typeof(error));
+          console.log(error)
+          if(error instanceof SyntaxError){
+            this.openDlgLogin();
+          }
+          else{
+            this.setState({connect_error:true});
+          }
       }
-    );
+     );
   };
-  // removeFoodItem = (itemIndex) => {
-  //   const filteredFoods = this.state.selectedFoods.filter(
-  //     (item, idx) => itemIndex !== idx,
-  //   );
-  //   this.setState({ selectedFoods: filteredFoods });
-  // }
-
-  // addFood = (food) => {
-  //   const newFoods = this.state.selectedFoods.concat(food);
-  //   this.setState({ selectedFoods: newFoods });
-  // }
   handleTest = () => {
     //const contact2=update(this.state.contacts[this.state.selected],{baoxiang: {$set: "test"}});
     // console.log("handleTest");
@@ -248,32 +239,9 @@ class App extends Component {
     });
   };
   handleSearchChange = e => {
-    const value = e.target.value;
-
-    this.setState({
-      searchValue: value,
-    });
-
-    if (value === '') {
-      this.setState({
-        contacts: [],
-        showRemoveIcon: false,
-      });
-    } else {
-      this.setState({
-        showRemoveIcon: true,
-      });
-
-      Client.contacts(value, contacts => {
-        this.setState({
-          contacts: contacts.data, //.slice(0, MATCHING_ITEM_LIMIT),
-        });
-      });
-    }
-  };
-  handleSearchChange = e => {
     this.mystate.search = e.target.value;
     this.setState({ search: this.mystate.search });
+    this.load_data();
   };
   handlePrev = e => {
     this.mystate.start = this.mystate.start - this.mystate.limit;
@@ -355,7 +323,9 @@ class App extends Component {
         <TableCell>{contact.hetongbh}</TableCell>
         <TableCell>{contact.yonghu}</TableCell>
         <TableCell>{contact.baoxiang}</TableCell>
-        <TableCell>{contact.yiqixinghao}</TableCell>
+        <TableCell>{contact.yqbh}
+          <SimpleSelect />
+        </TableCell>
       </TableRow>
     ));
     var hasprev = true;
@@ -407,9 +377,6 @@ class App extends Component {
               onChange={this.handleSearchChange}
               onKeyPress={this.handleSearchKeyPress}
             />
-            <Button variant="outlined" onClick={this.handleSearch}>
-              go
-            </Button>
             <div>
               <DialogImportStandard
                 title="导入标样"
@@ -423,27 +390,6 @@ class App extends Component {
                 contact={this.state.selected}
                 parent={this}
               />
-            </div>
-            <div>
-              <Button variant="outlined" onClick={this.handleTest}>
-                test
-              </Button>
-              <Button
-                variant="outlined"
-                aria-owns={anchorEl ? 'simple-menu' : null}
-                aria-haspopup="true"
-                onClick={this.handleClick}
-              >
-                {this.state.user}
-              </Button>
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={this.handleClose}
-              >
-                <MenuItem onClick={this.handleLogout}>注销</MenuItem>
-              </Menu>
             </div>
           </Toolbar>
           <Table>

@@ -210,7 +210,7 @@ export default class ContactEdit extends React.Component {
     //var m2 = new Date(this.state.tiaoshi_date.replace(/-/,"/"));
     return (
       <div>
-        <Button onClick={this.handleOpen}>{this.props.title}</Button>
+        <Button variant="outlined" onClick={this.handleOpen}>{this.props.title}</Button>
         <Dialog
           fullScreen
           scroll={this.state.scroll}

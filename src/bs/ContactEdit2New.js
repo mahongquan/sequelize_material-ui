@@ -336,37 +336,10 @@ class ContactEdit2New  extends Component{
   detailchange=(value)=>{
     console.log(value);
     this.setState({rich:value});
-    // const contact2=update(this.state.contact,{["detail"]: {$set:value.toString('html')}});
-    // this.setState({contact:contact2});
-    // if (this.props.onChange) {
-    //   // Send the changes up to the parent component as an HTML string.
-    //   // This is here to demonstrate using `.toString()` but in a real app it
-    //   // would be better to avoid generating a string on each change.
-    //   this.props.onChange(
-    //     value.toString('html')
-    //   );
-    // }
   }
   render=()=>{
-    // var o=[
-    //                     "1O(低氧)",
-    //                     "1O(高氧)",
-    //                     "1O(低氧)+2N",
-    //                     "1C(低碳)+2S",
-    //                     "1C(高碳)+2S",
-    //                     "2C+1S(低硫)",
-    //                     "2C+1S(高硫)",
-    //                     "2C+2S",
-    //                     "2O+2N",
-    //                     "2O",
-    //                   ];
-    // var options_channels=[];
-    // for(var i in o){
-    //   options_channels.push({label:o[i],value:o[i]});
-    // }
-    // console.log("render contactedit");
     return (
-        <Modal show={this.props.showModal} onHide={this.props.handleClose}>
+        <Modal show={this.props.showModal} onHide={this.props.handleClose} >
           <Modal.Header closeButton>
             <Modal.Title>编辑仪器信息</Modal.Title>
           </Modal.Header>

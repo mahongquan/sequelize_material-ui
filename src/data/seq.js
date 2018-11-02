@@ -15,7 +15,7 @@ var funcs={}
 class socket{
     static on(url,cb){
         funcs[url]=cb;
-        console.log(url);
+        // console.log(url);
     }
     static emit(url,data,callback){
     	console.log(url);
@@ -35,28 +35,16 @@ models.sequelize.sync().then(
 				});
 
 			}); 
-			// def showcontact(request):
-   //  #print request.GET
-   //  contact_id=request.GET["id"]
-   //  c=Contact.objects.get(id=contact_id)
-   //  dic={}
-   //  dic["contact"]=c
-   //  (items,items2)=c.huizong()
-   //  dic["items"]=items
-   //  if len(items2)==0:
-   //      items2=None
-   //  dic["items2"]=items2
-   //  totalct=0
-   //  for i in items:
-   //      totalct +=i.ct
-   //  dic["totalct"]=totalct
-   //  dic["totalid"]=len(items)
-   //  return HttpResponse(json.dumps(dic, ensure_ascii=False,cls=MyEncoder)) 
    			socket.on('/get/showcontact', async function( data, callback ) {
    				console.log(data);
+   				var contact = await models.Contact.findById(data.id); //.then(function(packitem) {
 				callback({
 					success:true,
-					data:[],
+					contact:contact,
+					items:[],
+					items2:[],
+					totalct:0,
+					totalid:0,
 					message: "showcontact ok"
 				});
    			});
@@ -230,7 +218,10 @@ models.sequelize.sync().then(
 					limit: limit,
 					offset: start,
 					order: [['yujifahuo_date','DESC']]
-				})
+				});
+				for(var i=0;i<contacts.length;i++){
+					contacts[i]=contacts[i].dataValues;
+				}
 				callback({
 					data: contacts,
 					total: total
@@ -248,16 +239,22 @@ models.sequelize.sync().then(
 			}); //delete
 			//route.post('/rest/UsePack', async function(ctx,next) {
 			socket.on('/post/UsePack', async function( data, callback ) {				
-				var contact = await models.UsePack.create(data)
+				var data1={};
+				data1.contact_id=data.contact;
+				data1.pack_id=data.pack;
+				var contact = await models.UsePack.create(data1);
 				var pack = await contact.getPack();
 				contact.dataValues["Pack"] = pack;
+				contact.name=pack.name;
+				contact.pack=pack.id;
 				callback({
 					data: contact,
 					message: "create UsePack ok"
 				});
 			});
 			//route.put('/rest/UsePack', async function(ctx,next) {
-			socket.on('/put/UsePack', async function( data, callback ) {				
+			socket.on('/put/UsePack', async function( data, callback ) {
+				console.log(data);				
 				var contact = await models.UsePack.findById(data.id); //.then(function(packitem) {
 				contact.update(data);
 				contact.save();
@@ -269,29 +266,60 @@ models.sequelize.sync().then(
 			socket.on('/post/UsePackEx', async function( data, callback ) {				
 				console.log(data);	
 				var rec1 = await models.Pack.create(data)
-				var rec = await models.UsePack.create({contact_id:data.contact_id,pack_id:rec1.id})
+				var rec = await models.UsePack.create({contact_id:data.contact,pack_id:rec1.id})
 				rec.dataValues["Pack"] = rec1;
+				rec.name=rec1.name;
+				rec.pack=rec1.id;
 				callback({
 					data: rec,
 					message: "create UsePack ok"
 				});
 			 });
-			socket.on('/post/PackItemEx', async function( data, callback ) {				
+			
+			socket.on('/put/BothPackItem', async function( data, callback ) {				
+				console.log("BothPackItem");
+				console.log(data);
+				var item = await models.Item.findById(data.itemid); //.then(function(packitem) {
+				item.update(data);
+				item.save();
+				var packitem = await models.PackItem.findById(data.id); //.then(function(packitem) {
+				packitem.update(data);
+				packitem.save();
+				packitem.name=item.name
+					packitem.guige=item.guige
+					packitem.bh=item.bh
+					packitem.danwei=item.danwei
+					packitem.itemid=item.id
+				callback({
+					data: packitem,
+					message: "create PackItem ok"
+				});
+			 });
+
+			socket.on('/post/BothPackItem', async function( data, callback ) {				
 				console.log(data);	
+				if(!data.ct) data.ct=0;
+				if(!data.danwei) data.danwei="";
 				var rec1 = await models.Item.create(data)
-				var rec = await models.PackItem.create({pack_id:data.pack_id,item_id:rec1.id,ct:1,quehuo:false})
+				var rec = await models.PackItem.create({pack_id:data.pack,item_id:rec1.id,ct:1,quehuo:false})
 				rec.dataValues["Item"] = rec1;
+					rec.name=rec1.name
+					rec.guige=rec1.guige
+					rec.bh=rec1.bh
+					rec.danwei=rec1.danwei
+					rec.itemid=rec1.id
 				callback({
 					data: rec,
 					message: "create PackItem ok"
 				});
 			 });
-			socket.on('/get/UsePack', async function( data, callback ) {				
+			socket.on('/get/UsePack', async function( data, callback ) {	
+				console.log(data);
 				var start = data.start;
 				var limit = data.limit;
 				var search = data.search;
 				var w = {
-					contact_id: data.contact_id
+					contact_id: data.contact
 				};
 				var datas = await models.UsePack.findAll({
 					attributes: [
@@ -309,8 +337,14 @@ models.sequelize.sync().then(
 						model: models.Pack,
 					}],
 				})
+				let res=[];
+				for(var i=0;i<contacts.length;i++){
+					res[i]=contacts[i].dataValues;
+					res[i].name=contacts[i].Pack.name;
+					res[i].pack=contacts[i].Pack.id;
+				}
 				callback({
-					data: contacts,
+					data: res,
 					total: total
 				});
 			});
@@ -325,12 +359,19 @@ models.sequelize.sync().then(
 				});
 			}); //delete
 			//route.post('/rest/PackItem', async function(ctx,next) {
-			socket.on('/post/PackItem', async function( data, callback ) {				
-				var contact = await models.PackItem.create(data)
-				var pack = await contact.getItem();
-				contact.dataValues["Item"] = pack;
+			socket.on('/post/PackItem', async function( data, callback ) {	
+				console.log(data);//pack itemid
+				let data1={pack_id:data.pack,item_id:data.itemid,quehuo:false,ct:1};
+				var pi = await models.PackItem.create(data1)
+				var i = await pi.getItem();
+				pi=pi.dataValues;
+				pi.name=i.name
+					pi.guige=i.guige
+					pi.bh=i.bh
+					pi.danwei=i.danwei
+					pi.itemid=i.id
 				callback({
-					data: contact,
+					data: pi,
 					message: "create UsePack ok"
 				});
 			});
@@ -371,7 +412,7 @@ models.sequelize.sync().then(
 				let search="";
 				if(data.search) search = data.search;
 				var w = {
-					pack_id: data.pack_id
+					pack_id: data.pack
 				};
 				var datas = await models.PackItem.findAll({
 					attributes: [
@@ -389,8 +430,17 @@ models.sequelize.sync().then(
 						model: models.Item,
 					}],
 				})
+				let res=[]
+				for(var i=0;i<contacts.length;i++){
+					res[i]=contacts[i].dataValues;
+					res[i].name=contacts[i].Item.name
+					res[i].guige=contacts[i].Item.guige
+					res[i].bh=contacts[i].Item.bh
+					res[i].danwei=contacts[i].Item.danwei
+					res[i].itemid=contacts[i].Item.id
+				}
 				callback({
-					data: contacts,
+					data: res,
 					total: total
 				});
 			});
@@ -455,6 +505,17 @@ models.sequelize.sync().then(
 					message: "create item ok"
 				});
 			});
+			socket.on('/put/Item', async function( data, callback ) {				
+				console.log(data);
+				var item = await models.Item.findById(data.id);
+				item.update(data);
+				// item.dataValues=data.dataValues;
+				item.save();
+				callback({
+					data: item.dataValues,
+					message: "update item ok"
+				});
+			});
 			//route.get('/rest/Item', async function(ctx,next) {
 			socket.on('/get/Item', async function( data, callback ) {				
 				console.log(data);
@@ -486,6 +547,9 @@ models.sequelize.sync().then(
 					offset: start,
 					order: [['id','DESC']]
 				});
+				for(var i=0;i<contacts.length;i++){
+					contacts[i]=contacts[i].dataValues;
+				}
 				if (contacts.length > 0) {
 					callback({
 						data: contacts,
@@ -496,68 +560,6 @@ models.sequelize.sync().then(
 						data: contacts,
 						total: 0
 					});
-				}
-			});
-						//  socket.on('/get/Item', async function( data, callback ) {
-						// 		console.log(data)
-						// 		var start = data.start;
-						// 		var limit = data.limit;
-						// 		var search = data.search;
-						// 		var w = {
-						// 			//contact_id:data.contact_id
-						// 		};
-						// 		var datas = await models.Item.findAll({
-						// 			attributes: [
-						// 				[models.sequelize.fn('COUNT', models.sequelize.col('id')), 'total'],
-						// 			],
-						// 			where: w
-						// 		})
-						// 		var total = datas[0].dataValues.total;
-						// 		console.log("total=" + total);
-						// 		var contacts = await models.Item.findAll({
-						// 			where: w,
-						// 			limit: limit,
-						// 			offset: start
-						// 		})
-						// 	callback( { 'success': true ,
-						// 			data: contacts,
-						// 			total: total} );
-						// });
-						// socket.on('/get/UsePack', async function( data, callback ) {
-						// 		console.log(data)
-						// 		var start = data.start;
-						// 		var limit = data.limit;
-						// 		var search = data.search;
-						// 		var w = {
-						// 			contact_id:data.contact_id
-						// 		};
-						// 		var datas = await models.UsePack.findAll({
-						// 			attributes: [
-						// 				[models.sequelize.fn('COUNT', models.sequelize.col('id')), 'total'],
-						// 			],
-						// 			where: w
-						// 		})
-						// 		var total = datas[0].dataValues.total;
-						// 		console.log("total=" + total);
-						// 		var contacts = await models.UsePack.findAll({
-						// 			where: w,
-						// 			limit: limit,
-						// 			offset: start,
-						// 			include: [{
-						// 				model: models.Pack,
-						// 			}],
-						// 		})
-						// 	callback( { 'success': true ,
-						// 			data: contacts,
-						// 			total: total} );
-						// });
-
-			socket.on('enterRoom', function( tableId ) {
-				if( typeof players[socket.id] !== 'undefined' && players[socket.id].room === null ) {
-					// Add the player to the socket room
-					socket.join( 'table-' + tableId );
-					// Add the room to the player's data
-					players[socket.id].room = tableId;
 				}
 			});
 			callback();

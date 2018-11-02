@@ -52,6 +52,7 @@ class UsePackEditNew extends Component{
   //   this.setState({usepack:this.old});
   // }
   render=()=>{
+    console.log(this.state);
     return (
         <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
           <Modal.Header closeButton>

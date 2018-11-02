@@ -15,7 +15,6 @@ class DlgItems extends Component {
   }
    state = {
       items: [],
-      user: "AnonymousUser",
       start:0,
       total:0,
       search:"",
@@ -53,13 +52,9 @@ class DlgItems extends Component {
         query:this.mystate.search,
       }, 
       (contacts2) => {
-        var user=contacts2.user;
-        if(user===undefined){
-          user="AnonymousUser"
-        }
+        console.log(contacts2);
         this.setState({
           items: contacts2.data, //.slice(0, MATCHING_ITEM_LIMIT),
-          user: user,
           total:contacts2.total,
           start:this.mystate.start
         });
