@@ -9,7 +9,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import Client from './Client';
 import DialogExampleSimple from './DialogExampleSimple';
 import DialogImportStandard from './DialogImportStandard';
 import ContactEdit from './ContactEdit';
@@ -19,7 +18,7 @@ import blue from '@material-ui/core/colors/blue';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
-
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 const styles = theme => ({
   root: {
     display: 'flex',
@@ -33,53 +32,98 @@ const styles = theme => ({
     marginTop: theme.spacing.unit * 2,
   },
 });
-
-class SimpleSelect extends React.Component {
+class SimpleMenu extends React.Component {
   state = {
-    age: '',
-    name: 'hai',
+    anchorEl: null,
   };
 
-  handleChange = event => {
-    this.setState({ [event.target.name]: event.target.value });
+  handleClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
   };
-  onClick = () => {
-    console.log('click');
+
+  handleClose = (value) => {
+    this.setState({ anchorEl: null });
+    this.props.click_menu(value);
   };
+
   render() {
-    // const { classes } = this.props;
-
+    const { anchorEl } = this.state;
     return (
-      <Select
-        value="baoxiang"
-        onChange={this.handleChange}
-        inputProps={{
-          name: 'age',
-          id: 'age-simple',
-        }}
-      >
-        <MenuItem value="" onClick={this.onClick}>
-          <em>None</em>
-        </MenuItem>
-        <MenuItem value={10} onClick={this.onClick}>
-          Ten
-        </MenuItem>
-        <MenuItem value={20} onClick={this.onClick}>
-          Twenty
-        </MenuItem>
-        <MenuItem value={30} onClick={this.onClick}>
-          Thirty
-        </MenuItem>
-      </Select>
+      <span>
+        <Button
+          aria-owns={anchorEl ? 'simple-menu' : undefined}
+          aria-haspopup="true"
+          onClick={this.handleClick}
+        >
+          <ArrowDropDownIcon />
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={this.handleClose}
+        >
+          <MenuItem onClick={()=>{
+            this.handleClose(0);
+          }}>详细</MenuItem>
+          <MenuItem onClick={()=>{
+            this.handleClose(1);
+          }}>资料文件夹</MenuItem>
+          <MenuItem onClick={()=>{
+            this.handleClose(2);
+          }}>核对备料计划</MenuItem>
+        </Menu>
+      </span>
     );
   }
 }
+// class SimpleSelect extends React.Component {
+//   state = {
+//     age: '',
+//     name: 'hai',
+//   };
 
-SimpleSelect.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+//   handleChange = event => {
+//     console.log(event);
+//     this.setState({ [event.target.name]: event.target.value });
+//   };
+//   onClick = () => {
+//     console.log('click');
+//   };
+//   render() {
+//     // const { classes } = this.props;
 
-var SimpleSelectStyle = withStyles(styles)(SimpleSelect);
+//     return (
+//       <Select
+//         value="baoxiang"
+//         onChange={this.handleChange}
+//         inputProps={{
+//           name: 'age',
+//           id: 'age-simple',
+//         }}
+//       >
+//         <MenuItem value="" onClick={this.onClick}>
+//           <em>None</em>
+//         </MenuItem>
+//         <MenuItem value={10} onClick={this.onClick}>
+//           Ten
+//         </MenuItem>
+//         <MenuItem value={20} onClick={this.onClick}>
+//           Twenty
+//         </MenuItem>
+//         <MenuItem value={30} onClick={this.onClick}>
+//           Thirty
+//         </MenuItem>
+//       </Select>
+//     );
+//   }
+// }
+
+// SimpleSelect.propTypes = {
+//   classes: PropTypes.object.isRequired,
+// };
+
+// var SimpleSelectStyle = withStyles(styles)(SimpleSelect);
 const theme = createMuiTheme({
   typography: {
     // In Japanese the characters are usually larger.
@@ -316,15 +360,26 @@ class App extends Component {
   handleSearchKeyPress = e => {
     console.log(e);
   };
+  click_menu_contact=(idx,value)=>{
+    console.log(idx +","+value);
+  }
+  edit_contact=(idx)=>{
+    console.log("edit"+idx);
+  }
   render() {
     const contactRows = this.state.contacts.map((contact, idx) => (
-      <TableRow key={idx} onClick={() => this.oncontactClick(idx)}>
+      <TableRow key={idx}>
         <TableCell>{contact.id}</TableCell>
         <TableCell>{contact.hetongbh}</TableCell>
         <TableCell>{contact.yonghu}</TableCell>
         <TableCell>{contact.baoxiang}</TableCell>
-        <TableCell>{contact.yqbh}
-          <SimpleSelect />
+        <TableCell>
+          <Button onClick={
+            ()=>{this.edit_contact(idx);
+          }}>{contact.yiqibh}</Button>
+          <SimpleMenu click_menu={(value)=>{
+            this.click_menu_contact(idx,value);
+          }}/>
         </TableCell>
       </TableRow>
     ));
@@ -386,7 +441,7 @@ class App extends Component {
             </div>
             <div>
               <ContactEdit
-                title="编辑仪器信息"
+                title="新仪器"
                 contact={this.state.selected}
                 parent={this}
               />
@@ -399,7 +454,7 @@ class App extends Component {
                 <TableCell>合同编号</TableCell>
                 <TableCell>用户单位</TableCell>
                 <TableCell>包箱</TableCell>
-                <TableCell>仪器型号</TableCell>
+                <TableCell>仪器编号</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{contactRows}</TableBody>
@@ -410,6 +465,7 @@ class App extends Component {
           </label>
           {next}
           <TextField
+            style={{width:"50px"}}
             maxLength="6"
             size="6"
             onChange={this.handlePageChange}
