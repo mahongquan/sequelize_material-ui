@@ -27,7 +27,7 @@ function getWhere() {
   }
   return where;
 }
-let module_name = './mui/App_bootstrap';
+let module_name = './mui/App';
 let where = getWhere();
 // link(where, 'node_modules/bootstrap/dist/css/bootstrap.min.css');
 link('./bs', './autosuggest.css');

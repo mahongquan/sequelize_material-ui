@@ -164,7 +164,6 @@ class PackItems extends React.Component {
         <input id="new_pack1"  placeholder="新备件" value={this.state.newPackName} onChange={this.newpackChange}/>
         <Button  variant="outlined" className="btn btn-info" id="id_new_item" onClick={this.new_packitem}>新备件</Button>
       </div>
-      <div style={{minHeight:"200px"}}></div>
       <PackItemEditNew ref="dlg" parent={this} />
       </div>
     );
