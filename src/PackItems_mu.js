@@ -1,5 +1,5 @@
 import React from 'react';
-import Client from './Client';
+// import Client from './Client';
 import { Table } from 'react-bootstrap';
 import PackItemEdit from './PackItemEdit_mu';
 import update from 'immutability-helper';

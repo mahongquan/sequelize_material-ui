@@ -1,9 +1,12 @@
 import React from 'react';
-import Client from './Client';
+// import Client from './Client';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+// variant="outlined" 
 //import AutoComplete from 'material-ui/AutoComplete';
 import Autosuggest from 'react-autosuggest';
 import UsePackEdit from './UsePackEdit_mu';
@@ -22,12 +25,12 @@ class UsePacks extends React.Component {
   componentDidMount = () => {
     if (this.props.contact_id) {
       var self = this;
-      Client.UsePacks(this.props.contact_id, usepacks => {
-        self.setState({
-          usepacks: usepacks.data, //.slice(0, MATCHING_ITEM_LIMIT),
-        });
-        console.log(usepacks);
-      });
+      // Client.UsePacks(this.props.contact_id, usepacks => {
+      //   self.setState({
+      //     usepacks: usepacks.data, //.slice(0, MATCHING_ITEM_LIMIT),
+      //   });
+      //   console.log(usepacks);
+      // });
     }
   };
   handleSearchChange = e => {
@@ -131,12 +134,11 @@ class UsePacks extends React.Component {
         <TableCell>{food.hetongbh}</TableCell>
         <TableCell>
           <UsePackEdit parent={this} index={idx} title="编辑" />
-          <a
+          <Button  variant="outlined" 
             onClick={() => this.onDeleteClick(idx)}
-            style={{ marginLeft: '10px' }}
           >
             删除
-          </a>
+          </Button>
         </TableCell>
       </TableRow>
     ));
@@ -171,25 +173,25 @@ class UsePacks extends React.Component {
             suggestions={this.state.auto_items}
             renderSuggestion={item => <span>{item.name}</span>}
           />
-          <button className="btn" onClick={this.bibei}>
+          <Button  variant="outlined" onClick={this.bibei}>
             必备
-          </button>
+          </Button>
         </div>
         <div>
           新包名称：
-          <input
+          <TextField
             id="new_pack1"
             placeholder="新包"
             value={this.state.newPackName}
             onChange={this.newpackChange}
           />
-          <button
+          <Button  variant="outlined" 
             className="btn btn-info"
             id="id_new_usepack"
             onClick={this.new_pack}
           >
             新包
-          </button>
+          </Button>
         </div>
       </div>
     );

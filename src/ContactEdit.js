@@ -1,27 +1,11 @@
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
-import Client from './Client';
 import UsePacks from './UsePacks';
-// import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-//import AutoComplete from '@material-ui/core/AutoComplete';
-//import DatePicker from '@material-ui/core/DatePicker';
 import Autosuggest from 'react-autosuggest';
-//import areIntlLocalesSupported from 'intl-locales-supported';
 import update from 'immutability-helper';
-let DateTimeFormat;
-// if (areIntlLocalesSupported( ['zh-Hans'])) {
-//   var date = new Date(Date.UTC(2012, 11, 20, 3, 0, 0));
-//   DateTimeFormat = global.Intl.DateTimeFormat;
-//   console.log(new DateTimeFormat('zh-Hans').format(date));
-// } else {
-//   console.log("intl");
-//   const IntlPolyfill = require('intl');
-//   DateTimeFormat = IntlPolyfill.DateTimeFormat;
-//   require('intl/locale-data/jsonp/zh-Hans');
-// }
-//console.log(DateTimeFormat());
+var moment = require('moment');
 function toDateStr(d) {
   var m = d.getMonth() + 1;
   return d.getFullYear() + '-' + m + '-' + d.getDate();
@@ -29,28 +13,75 @@ function toDateStr(d) {
 export default class ContactEdit extends React.Component {
   state = {
     scroll: 'paper',
-    open: false,
     shenhe: null,
-    yiqixinghao: null,
+    yiqixinghao: "",
     hetongbh: null,
     id: null,
     baoxiang: null,
     yonghu: null,
     tiaoshi_date: null,
-    channels: null,
+    channels: "",
     yiqibh: null,
     addr: null,
     yujifahuo_date: null,
-
     yiqixinghao_items: ['CS-2800', 'ON-3000'],
     channels_items: ['2C+1S', '2O'],
     bg: {},
   };
+  componentWillReceiveProps(nextProps) {
+    if(!this.props.open && nextProps.open){
+      this.onShow(nextProps.index);
+    }
+    else if(this.props.open && !nextProps.open)
+    {
+      this.onHide();
+    }
+  }
+  onShow=(idx)=>{
+    this.open2(idx);
+  }
+  onHide=()=>{
+  }
+  open2=(idx)=>{
+    console.log("open2");
+    console.log(idx);
+    this.setState({bg:{}});
+    this.parent=this.props.parent;
+    this.index=idx;
+    if (this.index==null){
+      this.old={
+        yujifahuo_date:moment().format("YYYY-MM-DD"),
+        tiaoshi_date:moment().format("YYYY-MM-DD"),
+        addr:"",
+        channels:"",
+        baoxiang:"",
+        hetongbh:"",
+        shenhe:"",
+        yonghu:"",
+        yiqibh:"",
+        yiqixinghao:""
+      };
+      this.setState({hiddenPacks:true});
+    }
+    else{
+      this.old=this.parent.state.contacts[this.index].dataValues;
+      this.setState({hiddenPacks:false});
+    }
+    this.old.dianqi=this.old.dianqi || "";
+    this.old.jixie=this.old.jixie || "";
+    this.old.redao=this.old.redao || "";
+    this.old.hongwai=this.old.hongwai || "";
+    
+    this.old.channels=this.old.channels || "";
+    this.old.detail=this.old.detail || "";
+    this.old.addr=this.old.addr || "";
+    this.setState(this.old);
+    console.log(this.old);
+  }
   yiqixinghao_change = value => {};
   yiqixinghao_select = data => {
     console.log('selected');
     console.log(data);
-    //this.addrow(data.value);
     this.setState({ yiqixinghao: data });
   };
   channels_change = value => {};
@@ -209,13 +240,11 @@ export default class ContactEdit extends React.Component {
     //var m1 = new Date(this.state.yujifahuo_date.replace(/-/,"/"));
     //var m2 = new Date(this.state.tiaoshi_date.replace(/-/,"/"));
     return (
-      <div>
-        <Button variant="outlined" onClick={this.handleOpen}>{this.props.title}</Button>
         <Dialog
           fullScreen
           scroll={this.state.scroll}
-          open={this.state.open}
-          onClose={this.handleClose}
+          open={this.props.open}
+          onClose={this.props.close}
         >
           <table>
             <tbody>
@@ -358,7 +387,6 @@ export default class ContactEdit extends React.Component {
                 <td>
                   <TextField
                     type="date"
-                    DateTimeFormat={DateTimeFormat}
                     locale="zh-Hans"
                     onChange={this.yujifahuo_date_change}
                     value={this.state.yujifahuo_date}
@@ -368,7 +396,6 @@ export default class ContactEdit extends React.Component {
                 <td>
                   <TextField
                     type="date"
-                    DateTimeFormat={DateTimeFormat}
                     locale="zh-Hans"
                     onChange={this.tiaoshi_date_change}
                     value={this.state.tiaoshi_date}
@@ -412,12 +439,11 @@ export default class ContactEdit extends React.Component {
               复制
             </Button>
             <UsePacks contact_id={this.state.id} />
-            <Button variant="outlined" onClick={this.handleClose}>
+            <Button variant="outlined" onClick={this.props.close}>
               取消
             </Button>
           </div>
         </Dialog>
-      </div>
     );
   }
 }

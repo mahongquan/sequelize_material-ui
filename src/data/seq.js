@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var models = require("./models");
+import  models from "./models";
 function DateStr(date) {
 	console.log(date);
     var year = date.getFullYear();
@@ -521,7 +521,7 @@ models.sequelize.sync().then(
 				console.log(data);
 				var start = data.start;
 				var limit = data.limit;
-				var search = data.search;
+				var search = data.query;
 				var w = null;
 				if (search && search != "") {
 					w = {

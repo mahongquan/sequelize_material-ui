@@ -1,7 +1,7 @@
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import update from 'immutability-helper';
-import Client from './Client';
+// import Client from './Client';
 var createReactClass = require('create-react-class');
 const PackItemEdit = createReactClass({
   getInitialState() {

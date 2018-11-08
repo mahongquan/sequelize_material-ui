@@ -158,6 +158,7 @@ class App extends Component {
     baoxiang: '',
     open: false,
     anchorEl: null,
+    open_edit:false,
   };
   componentDidMount = () => {
     this.load_data();
@@ -365,6 +366,16 @@ class App extends Component {
   }
   edit_contact=(idx)=>{
     console.log("edit"+idx);
+    this.show_edit(idx);
+  }
+  xinyiqi=()=>{
+    this.show_edit(null);
+  }
+  show_edit=(idx)=>{
+    this.setState({open_edit:true,selected:idx});
+  }
+  close_edit=()=>{
+    this.setState({open_edit:false}); 
   }
   render() {
     const contactRows = this.state.contacts.map((contact, idx) => (
@@ -418,6 +429,12 @@ class App extends Component {
     return (
       <MuiThemeProvider theme={theme}>
         <div className="App">
+           <ContactEdit open={this.state.open_edit}
+                close={this.close_edit}
+                title="新仪器"
+                index={this.state.selected}
+                parent={this}
+          />
           <Toolbar>
             <DialogExampleSimple
               title="登录"
@@ -440,11 +457,7 @@ class App extends Component {
               />
             </div>
             <div>
-              <ContactEdit
-                title="新仪器"
-                contact={this.state.selected}
-                parent={this}
-              />
+              <Button variant="outlined" onClick={this.xinyiqi}>新仪器</Button>
             </div>
           </Toolbar>
           <Table>

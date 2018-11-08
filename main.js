@@ -7,15 +7,25 @@ const BrowserWindow = electron.BrowserWindow
 //-----------------------------------------------------------------
 
 const {Menu, MenuItem, dialog, ipcMain }=electron;
-
-app.disableHardwareAcceleration();
+if(process.platform==="win32"){
+}
+else{
+  app.disableHardwareAcceleration();
+}
 //是否可以安全退出
 
 let safeExit = false;
 
 //-----------------------------------------------------------------
 
-
+const devMode = (process.argv || []).indexOf('--local') !== -1;
+let indexUrl;
+if(devMode){
+   indexUrl=`file://${__dirname}/src/index.html`;
+}
+else{
+   indexUrl=`file://${__dirname}/build/index.html`; 
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 
@@ -37,35 +47,75 @@ const createWindow = () => {
     height: 600,
 
   });
-  //menu
   const template=
     [{
-      label: 'File',
+      label: '文件',
       submenu: [
+       {
+          label: '新建',
+          accelerator: 'Ctrl+N',
+          click: (item, win) =>{
+            win.webContents.send("new");
+          },
+       },
+       {
+          label: '打开',
+          accelerator: 'Ctrl+O',
+          click: (item, win) =>{
+            win.webContents.send("open");
+          },
+       },
+       {
+          label: '保存',
+          accelerator: 'Ctrl+S',
+          click: (item, win) =>{
+            win.webContents.send("save");
+          },
+        },
         {
-          label: 'New Window',
+          label: '打印',
+          accelerator: 'Ctrl+P',
+          click: (item, win) =>{
+            console.log(win);
+            win.webContents.print();
+            // win.webContents.send("print");
+          },
+        },
+        {
+          label: '新窗口',
           accelerator: 'Ctrl+N',
           click: () =>{createWindow()},
         },
         {
           label: '重启',
           accelerator: 'Ctrl+H',
-          click: (item, win) =>{win.loadURL(`file://${__dirname}/src/index.html`);},
+          click: (item, win) =>{win.loadURL(indexUrl);},
         },
-        {
-          label: 'BACK',
-          accelerator: 'Ctrl+B',
+         {
+          label: 'DevTools',
+          accelerator: 'Ctrl+D',
           click: (item, win) =>{
-            win.webContents.send("goback");
+            win.openDevTools();
           },
         },
         {
-          label: 'Exit',
+          label: '退出',
           accelerator: 'Ctrl+E',
           click: (item, win) =>{
              // console.log(win);
              // console.log(mainWindow);
              win.close();
+          },
+        }
+        ]
+    },{
+      label: '帮助',
+      submenu: [
+        {
+          label: '关于',
+          accelerator: 'Ctrl+A',
+          click: (item, win) =>{
+            win.webContents.send("about");
           },
         }
         ]
@@ -79,7 +129,7 @@ const createWindow = () => {
   }
   // and load the index.html of the app.
 
-  mainWindow.loadURL(`file://${__dirname}/src/index.html`);
+  mainWindow.loadURL(indexUrl);
 
 
 

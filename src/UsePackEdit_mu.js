@@ -1,6 +1,7 @@
 import React from 'react';
 import PackItems from './PackItems_mu';
 import Dialog from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
 var createReactClass = require('create-react-class');
 const UsePackEdit = createReactClass({
   getInitialState() {
@@ -34,7 +35,7 @@ const UsePackEdit = createReactClass({
       maxHeight: 'none',
     };
     return (
-      <a onTouchTap={this.handleOpen}>
+      <Button variant="outlined" onTouchTap={this.handleOpen}>
         {this.props.title}
         <Dialog
           modal={false}
@@ -70,7 +71,7 @@ const UsePackEdit = createReactClass({
             <PackItems pack_id={this.state.usepack.pack} />
           </div>
         </Dialog>
-      </a>
+      </Button>
     );
   },
 });
